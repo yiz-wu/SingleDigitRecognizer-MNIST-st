@@ -3,6 +3,7 @@ import numpy as np
 import streamlit as st
 import tensorflow.keras as keras
 import json
+from pandas.io.formats.style import Styler
 from streamlit_drawable_canvas import st_canvas
 from PIL import Image
 
@@ -60,7 +61,7 @@ def main():
             # st.markdown(black_image.shape)   # (1, 28, 28, 1)
             prediction = model.predict(black_image)
             df = pd.DataFrame(prediction)
-            df_styler = pd.io.formats.style.Styler(df)
+            df_styler = Styler(df)
             df_styler.highlight_max(color='lightgreen', axis=1)
             df_styler.format("{:.2%}")
             st.dataframe(df_styler, width=None)
@@ -108,7 +109,7 @@ def main():
             # st.markdown(black_image.shape)   # (1, 28, 28, 1)
             prediction = model.predict(black_image)
             df = pd.DataFrame(prediction)
-            df_styler = pd.io.formats.style.Styler(df)
+            df_styler = Styler(df)
             df_styler.highlight_max(color='lightgreen', axis=1)
             df_styler.format("{:.2%}")
             st.dataframe(df_styler, width=None)
