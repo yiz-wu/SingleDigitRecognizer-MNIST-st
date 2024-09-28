@@ -2,9 +2,28 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 import tensorflow.keras as keras
+import json
 from pandas.io.formats.style import Styler
 from streamlit_drawable_canvas import st_canvas
 from PIL import Image
+
+def visualize_prediction(prediction):
+    df = pd.DataFrame(prediction)
+    df_styler = Styler(df)
+    df_styler.highlight_max(color='lightgreen', axis=1)
+    df_styler.format("{:.2%}")
+    st.dataframe(df_styler, width=None)
+
+def preprocess_image(image_data):
+    # resize image to 28x28
+    image = Image.fromarray(image_data)
+    resized_image = image.resize((28, 28))
+
+    # rescale image to shape and value required by the model
+    image_array = np.array(resized_image) / 255.0
+    image_tensor = image_array.reshape(1, 28, 28, 1)
+
+    return image_tensor
 
 # ("freedraw", "line", "rect", "circle", "transform", "polygon", "point")
 drawing_mode = 'freedraw'
@@ -54,21 +73,11 @@ def main():
             st.write("Below the prediction performed with the original image")
             st.image(canvas_result.image_data)
 
-            # resize image to 28x28
-            image = Image.fromarray(canvas_result.image_data[:,:,-1])
-            resized_image = image.resize((28, 28))
+            processed_image = preprocess_image(canvas_result.image_data[:,:,-1])
 
-            # rescale image to shape and value required by the model
-            image_array = np.array(resized_image) / 255.0
-            black_image = image_array.reshape(1, 28, 28, 1)
-            prediction = model.predict(black_image)
+            prediction = model.predict(processed_image)
 
-            # visualize the prediction result
-            df = pd.DataFrame(prediction)
-            df_styler = Styler(df)
-            df_styler.highlight_max(color='lightgreen', axis=1)
-            df_styler.format("{:.2%}")
-            st.dataframe(df_styler, width=None)
+            visualize_prediction(prediction)
 
         with st.container(border=True, height=None) :
 
@@ -108,22 +117,11 @@ def main():
             with st.container(border=True, height=None) :
                 st.image(restored_image/255.0)
 
+            processed_image = preprocess_image(padded_image)
 
-            # resize image to 28x28
-            image = Image.fromarray(padded_image)
-            resized_image = image.resize((28, 28))
+            prediction = model.predict(processed_image)
 
-            # rescale image to shape and value required by the model
-            image_array = np.array(resized_image) / 255.0
-            black_image = image_array.reshape(1, 28, 28, 1)
-            prediction = model.predict(black_image)
-
-            # visualize the prediction result
-            df = pd.DataFrame(prediction)
-            df_styler = Styler(df)
-            df_styler.highlight_max(color='lightgreen', axis=1)
-            df_styler.format("{:.2%}")
-            st.dataframe(df_styler, width=None)
+            visualize_prediction(prediction)
         
 
 
